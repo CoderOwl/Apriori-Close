@@ -14,7 +14,7 @@ object AprioriClose {
   }
 
 
-
+  //Takes in one sets of itesms and counts how manyt sets in data it is a subset of.
   def supportCount(combination: Set[String], data: Seq[Set[String]]): Int = {
     //For each set in data, check if combination is a subset of it.
     var count = 0
@@ -28,19 +28,24 @@ object AprioriClose {
     count
   }
 
+  //To return the list of frequent closed itemsets.
   def findFrequentClosed(data: Seq[Set[String]]): Unit = {
+
+      // generators will get all the distinct items that are part of the data.
       var generators = data.flatten.map({str =>
         val set = new mutable.HashSet[String]()
         set += str
         set.toSet
       }).toSet
 
+      // result to be returned. Yet to be populated.
       var result = new mutable.MutableList[Set[String]]
+
       while(!generators.isEmpty)
       {
-          generators = generators.filter(generator => supportCount(generator, data) >= 2)                  //Pruning infrequent.
+          generators = generators.filter(generator => supportCount(generator, data) >= 2)                  // Pruning infrequent.
           println(generators)
-          //Generating next level itemsets.
+          //Generating next level itemsets from generators.
           val newItemSet = new mutable.HashSet[Set[String]]
           generators.foreach({ set1 =>
               generators.foreach({ set2 =>
@@ -49,15 +54,19 @@ object AprioriClose {
                       val sup = supportCount(newSet, data)
                       val sup1 = supportCount(set1, data)
                       val sup2 = supportCount(set2, data)
-                      if(sup1 > sup && sup2 > sup)
+                      if(sup1 > sup && sup2 > sup)                                                        // Pruning the closed ones.
                           newItemSet += newSet
+                      /**
+                       * TODO:
+                       * Populate result
+                       **/
                   }
               })
           })
           generators = newItemSet.toSet
-          //Check for closure and remove.
 
-          
+
+
           // generators.foreach(generator => result+=generator)
 
       }
@@ -66,6 +75,7 @@ object AprioriClose {
       println(result)
   }
 
+  //Reads from the file and forms a List of Sets of Strings(Items).
   def readDataFromFile(fileName: String): Seq[Set[String]] = {
     val input = Source.fromFile(fileName)
     val inputScanner = new Scanner(input.bufferedReader())
